@@ -1,5 +1,5 @@
 import api from '@/app/utils/api';
-import { RegisterPayload } from '@/app/types/auth';
+import { LoginPayload, RegisterPayload } from '@/app/types/auth.types';
 
 export const registerUser = async (payload: RegisterPayload) => {
   const { data } = await api.post('/users/register', payload, {
@@ -8,15 +8,15 @@ export const registerUser = async (payload: RegisterPayload) => {
   return data;
 };
 
-export const loginUser = async (credentials: any) => {
-  const { data } = await api.post('/auth/login', credentials, {
+export const loginUser = async (payload: LoginPayload) => {
+  const { data } = await api.post('/users/login', payload, {
     withCredentials: true,
   });
   return data;
 };
 export const logoutUser = async () => {
   const { data } = await api.post(
-    '/auth/logout',
+    '/users/logout',
     {},
     { withCredentials: true }
   );

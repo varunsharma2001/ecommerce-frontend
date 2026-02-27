@@ -3,8 +3,8 @@ import { Formik } from 'formik';
 import {
   registerInitialValues,
   RegisterSchema,
-} from '@/app/components/register/utils/register.utils';
-import useRegister from '@/app/components/register/hooks/useRegister';
+} from '@/app/components/auth/register/utils/register.utils';
+import useRegister from '@/app/components/auth/register/hooks/useRegister';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
@@ -141,7 +141,7 @@ const RegisterForm = () => {
             <p className="text-center text-sm text-gray-600">
               Already have an account?{' '}
               <a
-                href="/login"
+                href="/auth/login"
                 className="font-medium text-black hover:underline"
               >
                 Login

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { RegisterFormValues } from '@/app/components/register/types/register.types';
+import { RegisterFormValues } from '@/app/types/auth.types';
 
 export const RegisterSchema = Yup.object({
   fullName: Yup.string().required('Full name is required'),
