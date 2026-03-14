@@ -1,5 +1,6 @@
-import Header from '@/app/components/header/Header';
-import Footer from '@/app/components/footer/Footer';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import CartHydrator from '@/components/layout/CartHydrator';
 import './../globals.css';
 
 export default function StoreLayout({
@@ -9,6 +10,8 @@ export default function StoreLayout({
 }>) {
   return (
     <>
+      {/* Fetches GET /cart once on mount to hydrate Redux (Navbar badge count) */}
+      <CartHydrator />
       <Header />
       <main className="flex-1 overflow-y-auto">{children}</main>
       <Footer />

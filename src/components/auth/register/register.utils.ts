@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { RegisterFormValues } from '@/app/types/auth.types';
+import type { RegisterFormValues } from '@/types/auth.types';
 
 export const RegisterSchema = Yup.object({
   fullName: Yup.string().required('Full name is required'),
@@ -13,6 +13,7 @@ export const RegisterSchema = Yup.object({
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 });
+
 export const registerInitialValues: RegisterFormValues = {
   fullName: '',
   username: '',

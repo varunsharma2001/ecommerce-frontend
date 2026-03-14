@@ -4,22 +4,16 @@ export default function Footer() {
   return (
     <footer className="border-t bg-white">
       <div className="mx-auto w-full max-w-7xl px-6 py-14">
-        {/* Top Section */}
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
-          {/* Brand */}
           <div className="max-w-sm space-y-3">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Doppio Store
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">ShopEase</h2>
             <p className="text-sm leading-6 text-gray-600">
               A modern ecommerce platform built for premium shopping
               experiences, trusted products, and fast delivery.
             </p>
           </div>
 
-          {/* Links Section */}
           <div className="grid w-full grid-cols-2 gap-10 sm:grid-cols-3 lg:w-auto">
-            {/* Shop */}
             <div>
               <p className="text-sm font-semibold text-gray-900">Shop</p>
               <ul className="mt-4 space-y-3 text-sm text-gray-600">
@@ -29,19 +23,23 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/deals" className="hover:text-gray-900">
-                    Deals & Offers
+                  <Link
+                    href="/products?sortBy=newest"
+                    className="hover:text-gray-900"
+                  >
+                    New Arrivals
                   </Link>
                 </li>
                 <li>
-                  <Link href="/new-arrivals" className="hover:text-gray-900">
-                    New Arrivals
+                  <Link
+                    href="/products?sortBy=price_asc"
+                    className="hover:text-gray-900"
+                  >
+                    Best Deals
                   </Link>
                 </li>
               </ul>
             </div>
-
-            {/* Company */}
             <div>
               <p className="text-sm font-semibold text-gray-900">Company</p>
               <ul className="mt-4 space-y-3 text-sm text-gray-600">
@@ -62,8 +60,6 @@ export default function Footer() {
                 </li>
               </ul>
             </div>
-
-            {/* Support */}
             <div>
               <p className="text-sm font-semibold text-gray-900">Support</p>
               <ul className="mt-4 space-y-3 text-sm text-gray-600">
@@ -87,9 +83,8 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-12 border-t pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Doppio Store. All rights reserved.
+          © {new Date().getFullYear()} ShopEase. All rights reserved.
         </div>
       </div>
     </footer>

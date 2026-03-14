@@ -1,23 +1,26 @@
-import { useState } from 'react';
-import { registerUser } from '@/app/services/auth/authService';
-import { RegisterPayload } from '@/app/types/auth.types';
-import { useRouter } from 'next/navigation';
-import { showError, showSuccess } from '@/app/utils/toast';
-import axios from 'axios';
+'use client';
 
-const getErrorMessage = (error: unknown) => {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { registerUser } from '@/services/auth/authService';
+import { showError, showSuccess } from '@/utils/toast';
+import type { RegisterPayload } from '@/types/auth.types';
+
+const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     return (
-      (error.response?.data as { message?: string } | undefined)?.message ||
-      'Something went wrong ❌'
+      (error.response?.data as { message?: string } | undefined)?.message ??
+      'Something went wrong'
     );
   }
-  return 'Something went wrong ❌';
+  return 'Something went wrong';
 };
 
 const useRegister = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
   const handleRegister = async (payload: RegisterPayload) => {
     setIsLoading(true);
     try {
@@ -30,9 +33,8 @@ const useRegister = () => {
       setIsLoading(false);
     }
   };
-  return {
-    handleRegister,
-    isLoading,
-  };
+
+  return { handleRegister, isLoading };
 };
+
 export default useRegister;

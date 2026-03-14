@@ -1,19 +1,17 @@
 'use client';
-import { Formik } from 'formik';
-import {
-  registerInitialValues,
-  RegisterSchema,
-} from '@/app/components/auth/register/utils/register.utils';
-import useRegister from '@/app/components/auth/register/hooks/useRegister';
-import { Eye, EyeOff } from 'lucide-react';
+
 import { useState } from 'react';
+import { Formik } from 'formik';
+import { Eye, EyeOff } from 'lucide-react';
+import { registerInitialValues, RegisterSchema } from './register.utils';
+import useRegister from '@/hooks/useRegister';
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { handleRegister, isLoading } = useRegister();
+
   return (
     <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
-      {/* Heading */}
       <h1 className="text-2xl font-bold text-gray-900">
         Create your account ✨
       </h1>
@@ -21,14 +19,10 @@ const RegisterForm = () => {
         Join us and start shopping smarter today.
       </p>
 
-      {/* Formik Form */}
       <Formik
         initialValues={registerInitialValues}
         validationSchema={RegisterSchema}
-        onSubmit={(values) => {
-          console.log('Register Payload:', values);
-          handleRegister(values);
-        }}
+        onSubmit={(values) => handleRegister(values)}
       >
         {({
           values,
@@ -113,8 +107,6 @@ const RegisterForm = () => {
                   placeholder="••••••••"
                   className="w-full rounded-xl border px-4 py-2.5 pr-12 text-sm focus:ring-2 focus:ring-black focus:outline-none"
                 />
-
-                {/* Toggle Button */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -128,7 +120,6 @@ const RegisterForm = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={!isValid || !dirty || isLoading}
@@ -137,7 +128,6 @@ const RegisterForm = () => {
               {isLoading ? 'Creating...' : 'Create Account'}
             </button>
 
-            {/* Login Link */}
             <p className="text-center text-sm text-gray-600">
               Already have an account?{' '}
               <a
@@ -153,4 +143,5 @@ const RegisterForm = () => {
     </div>
   );
 };
+
 export default RegisterForm;
