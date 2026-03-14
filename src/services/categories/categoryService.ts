@@ -1,4 +1,5 @@
 import api from '@/app/utils/api';
+import { ApiResponse } from '@/types/apiResponse.types';
 
 export interface Category {
   _id: string;
@@ -8,6 +9,6 @@ export interface Category {
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-  const { data } = await api.get<Category[]>('/admin/categories');
-  return data;
+  const res = await api.get<ApiResponse<Category[]>>('/admin/categories');
+  return res.data.data;
 }

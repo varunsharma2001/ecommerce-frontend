@@ -29,7 +29,6 @@ export default function CategoryBar() {
     queryFn: fetchCategories,
     staleTime: 10 * 60 * 1000, // 10 minutes — categories rarely change
   });
-
   const allCategories = [ALL_CATEGORY, ...categories];
 
   const handleClick = (slug: string) => {

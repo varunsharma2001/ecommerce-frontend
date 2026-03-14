@@ -3,7 +3,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
-export default function QueryProvider({ children }: { children: React.ReactNode }) {
+export default function QueryProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // useState ensures each request gets its own QueryClient (SSR safe)
   const [queryClient] = useState(
     () =>
@@ -14,7 +18,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
             retry: 1,
           },
         },
-      }),
+      })
   );
 
   return (

@@ -23,30 +23,53 @@ export interface PopulatedCategory {
   name: string;
 }
 
-// ─── Product ─────────────────────────────────────────────────────────────────
-// Display entity on PLP and PDP. Contains multiple purchasable variants.
+// ─── PLP Product (lightweight — NO variants) ──────────────────────────────────
+// Returned by GET /products.
+// Backend pre-computes all price fields internally from active variants.
+// Variants are intentionally excluded to keep the listing payload small.
+export interface ProductListItem {
+  _id: string;
+  title: string;
+  brand?: string;
+  image: string;           // primary image URL (first image only)
+  rating: number;
+  totalSold: number;
+  minPrice: number;        // lowest discountedPrice (or price) across active variants
+  originalPrice: number;   // lowest base price across active variants
+  discountPercent: number; // pre-calculated on backend
+}
+
+// ─── PDP Product (full — includes variants) ───────────────────────────────────
+// Returned by GET /products/:id.
+// Variants are required here — they are the sellable unit for add-to-cart.
 export interface Product {
   _id: string;
   title: string;
   description: string;
   brand?: string;
-  categoryId: string | PopulatedCategory; // populated in API responses
+  categoryId: string | PopulatedCategory;
   images: ProductImage[];
   rating: number;
   totalSold: number;
   variants: ProductVariant[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  totalElements?: number;
+  totalPages?: number;
+  hasNext?: boolean;
+  hasPrev?: boolean;
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────
 export interface ProductsApiResponse {
-  data: Product[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  products: ProductListItem[];
+  pagination: Pagination;
 }
 
 // ─── Query Params ─────────────────────────────────────────────────────────────
@@ -70,15 +93,6 @@ export function getCategoryName(product: Product): string {
     return product.categoryId.name;
   }
   return '';
-}
-
-/** Returns the cheapest active variant (default for PLP card display) */
-export function getDefaultVariant(
-  product: Product
-): ProductVariant | undefined {
-  const active = product.variants.filter((v) => v.isActive && v.stock > 0);
-  if (active.length === 0) return product.variants[0]; // fallback to first even if OOS
-  return active.reduce((min, v) => (v.price < min.price ? v : min), active[0]);
 }
 
 /** Returns unique attribute keys across all variants (e.g. ['color', 'size']) */

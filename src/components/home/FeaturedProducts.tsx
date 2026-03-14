@@ -8,17 +8,22 @@
 import Link from 'next/link';
 import { fetchProducts } from '@/services/products/productService';
 import ProductCard from '@/components/plp/ProductCard';
+import type { ProductListItem } from '@/types/product.types';
 
 export default async function FeaturedProducts() {
-  const { data: products } = await fetchProducts({
-    limit: 4,
-    sortBy: 'rating',
-  });
+  let products: ProductListItem[] = [];
+  try {
+    const result = await fetchProducts({ limit: 8 });
+    products = result.data.products;
+  } catch {
+    // Section silently disappears — home page still renders fully
+    return null;
+  }
 
   if (!products?.length) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-6">
+    <section className="mx-auto max-w-7xl border px-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-900">
           Featured Products
