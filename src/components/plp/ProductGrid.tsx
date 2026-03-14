@@ -15,7 +15,10 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { fetchProducts } from '@/services/products/productService';
 import ProductCard from './ProductCard';
-import type { ProductListItem, ProductQueryParams } from '@/types/product.types';
+import type {
+  ProductListItem,
+  ProductQueryParams,
+} from '@/types/product.types';
 
 interface ProductGridProps {
   searchParams: Record<string, string | undefined>;

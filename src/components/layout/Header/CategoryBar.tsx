@@ -48,7 +48,7 @@ export default function CategoryBar() {
           <button
             key={cat._id}
             onClick={() => handleClick(cat.slug)}
-            className={`text-sm font-medium whitespace-nowrap transition hover:text-black ${
+            className={`cursor-pointer text-sm font-medium whitespace-nowrap transition hover:text-black ${
               active === cat.slug
                 ? 'border-b-2 border-black text-black'
                 : 'text-gray-500'

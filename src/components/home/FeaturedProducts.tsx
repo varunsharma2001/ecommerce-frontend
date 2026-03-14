@@ -23,7 +23,7 @@ export default async function FeaturedProducts() {
   if (!products?.length) return null;
 
   return (
-    <section className="mx-auto max-w-7xl border px-6">
+    <section className="mx-auto max-w-7xl px-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-900">
           Featured Products

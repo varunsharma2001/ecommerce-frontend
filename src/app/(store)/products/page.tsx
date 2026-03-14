@@ -64,7 +64,7 @@ export default async function ProductsPage({
         - When ready, streams the grid HTML to replace the skeleton
       */}
       <Suspense key={JSON.stringify(params)} fallback={<ProductGridSkeleton />}>
-          <ProductGrid searchParams={params}/>
+        <ProductGrid searchParams={params} />
       </Suspense>
     </div>
   );

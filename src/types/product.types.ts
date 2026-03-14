@@ -31,11 +31,11 @@ export interface ProductListItem {
   _id: string;
   title: string;
   brand?: string;
-  image: string;           // primary image URL (first image only)
+  image: string; // primary image URL (first image only)
   rating: number;
   totalSold: number;
-  minPrice: number;        // lowest discountedPrice (or price) across active variants
-  originalPrice: number;   // lowest base price across active variants
+  minPrice: number; // lowest discountedPrice (or price) across active variants
+  originalPrice: number; // lowest base price across active variants
   discountPercent: number; // pre-calculated on backend
 }
 
