@@ -14,6 +14,9 @@ export interface CartApiVariant {
   price: number;
   discountedPrice?: number;
   stock: number;
+  sku: string;
+  totalSold?: number;
+  isActive?: boolean;
 }
 
 // Shape of each item returned by GET /cart (after backend's transform)
