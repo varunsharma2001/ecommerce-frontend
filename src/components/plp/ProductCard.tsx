@@ -1,22 +1,3 @@
-'use client';
-
-/**
- * Performance features used here:
- *
- * 1. React.memo — wraps the entire component. When the parent ProductGrid
- *    re-renders (e.g. user changes a filter), cards whose `product` prop
- *    hasn't changed are skipped entirely. Critical for a grid of 12-20 cards.
- *
- * 2. next/image — automatic WebP conversion, lazy loading, and correct sizing
- *    via the `sizes` prop. Without `sizes`, Next.js serves a full-size image
- *    even for a 25vw card, wasting bandwidth.
- *
- * Note: Add to Cart is intentionally on PDP only.
- * PLP API returns no variants — variants are the purchasable unit and are
- * only available on the full product detail response (GET /products/:id).
- */
-
-import { memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Star } from 'lucide-react';
@@ -28,7 +9,7 @@ interface ProductCardProps {
   product: ProductListItem;
 }
 
-const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group rounded-2xl border border-gray-100 bg-white p-4 transition hover:shadow-md">
       <Link href={`/products/${product._id}`} className="block">
@@ -91,6 +72,4 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
       </Link>
     </div>
   );
-});
-
-export default ProductCard;
+}
