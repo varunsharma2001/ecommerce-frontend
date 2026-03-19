@@ -3,17 +3,18 @@
 
 import api from '@/app/utils/api';
 import type { CartApiResponse } from '@/types/cart.types';
+import { ApiResponse } from '@/types/apiResponse.types';
 
-export async function fetchCart(): Promise<CartApiResponse> {
-  const { data } = await api.get<CartApiResponse>('/cart');
+export async function fetchCart(): Promise<ApiResponse<CartApiResponse>> {
+  const { data } = await api.get<ApiResponse<CartApiResponse>>('/cart');
   return data;
 }
 
 export async function addToCartApi(
   variantId: string,
   quantity: number
-): Promise<CartApiResponse> {
-  const { data } = await api.post<CartApiResponse>('/cart/add', {
+): Promise<ApiResponse<CartApiResponse>> {
+  const { data } = await api.post<ApiResponse<CartApiResponse>>('/cart/add', {
     variantId,
     quantity,
   });
@@ -22,17 +23,22 @@ export async function addToCartApi(
 
 export async function removeFromCartApi(
   variantId: string
-): Promise<CartApiResponse> {
-  const { data } = await api.delete<CartApiResponse>(`/cart/item/${variantId}`);
+): Promise<ApiResponse<CartApiResponse>> {
+  const { data } = await api.delete<ApiResponse<CartApiResponse>>(
+    `/cart/item/${variantId}`
+  );
   return data;
 }
 
 export async function updateCartQuantityApi(
   variantId: string,
   quantity: number
-): Promise<CartApiResponse> {
-  const { data } = await api.patch<CartApiResponse>(`/cart/item/${variantId}`, {
-    quantity,
-  });
+): Promise<ApiResponse<CartApiResponse>> {
+  const { data } = await api.patch<ApiResponse<CartApiResponse>>(
+    `/cart/item/${variantId}`,
+    {
+      quantity,
+    }
+  );
   return data;
 }
