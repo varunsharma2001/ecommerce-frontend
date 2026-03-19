@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency } from '@/utils/format';
 import type { ProductListItem } from '@/types/product.types';
@@ -67,7 +67,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         href={`/products/${product._id}`}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
       >
-        <ShoppingCart className="h-4 w-4" />
         View Product
       </Link>
     </div>
