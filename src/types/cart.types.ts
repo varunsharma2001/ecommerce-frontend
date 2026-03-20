@@ -16,7 +16,7 @@ export interface CartApiVariant {
   discountedPrice?: number;
   discountedPercentage?: number;
   stock: number;
-  images: ProductImage[];
+  images?: ProductImage[];
 }
 
 // Shape of each item returned by GET /cart (after backend's transform)

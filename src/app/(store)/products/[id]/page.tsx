@@ -72,7 +72,6 @@ export default async function ProductDetailPage({ params }: PDPProps) {
     .filter((v) => v.isActive)
     .map((v) => ({
       _id: v._id,
-      sku: v.sku,
       price: v.price,
       discountedPrice: v.discountedPrice,
       stock: v.stock,

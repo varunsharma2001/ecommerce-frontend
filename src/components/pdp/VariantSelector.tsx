@@ -100,7 +100,9 @@ export default function VariantSelector({
         </div>
       ))}
       {selectedVariant && (
-        <p className="text-xs text-gray-400">SKU: {selectedVariant?.sku}</p>
+        <p className="text-xs text-gray-400">
+          {selectedVariant.stock > 0 ? `${selectedVariant.stock} in stock` : 'Out of stock'}
+        </p>
       )}
     </div>
   );
