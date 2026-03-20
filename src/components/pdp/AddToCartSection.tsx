@@ -56,7 +56,6 @@ export default function AddToCartSection({
       quantity,
       product,
       variant,
-      variant.discountedPrice ?? variant.price
     );
   }, [addOptimistic, addToCart, variant, product, quantity]);
 
