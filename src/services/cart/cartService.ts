@@ -25,7 +25,7 @@ export async function removeFromCartApi(
   variantId: string
 ): Promise<ApiResponse<CartApiResponse>> {
   const { data } = await api.delete<ApiResponse<CartApiResponse>>(
-    `/cart/item/${variantId}`
+    `cart/remove/${variantId}`
   );
   return data;
 }
@@ -35,10 +35,8 @@ export async function updateCartQuantityApi(
   quantity: number
 ): Promise<ApiResponse<CartApiResponse>> {
   const { data } = await api.patch<ApiResponse<CartApiResponse>>(
-    `/cart/item/${variantId}`,
-    {
-      quantity,
-    }
+    `/cart/update`,
+    { variantId, quantity }
   );
   return data;
 }

@@ -9,7 +9,6 @@
  * When user clicks "Add to Cart", the Navbar badge and button state update
  * INSTANTLY (via optimisticAdd). The real API call runs in the background.
  * If it fails, the fulfilled/rejected reducer corrects the Redux state.
- * This gives Amazon/Flipkart-level responsiveness even on slow connections.
  */
 
 import { useCallback } from 'react';
@@ -21,46 +20,55 @@ import {
   removeItemFromCart,
   updateItemQuantity,
   optimisticAdd,
-  clearCart,
+  resetCartState,
+  openCart,
+  closeCart,
 } from '@/app/redux/slices/cart.slice';
+import { showError } from '@/utils/toast';
 import type { CartApiVariant, CartApiProduct } from '@/types/cart.types';
 
 export function useCart() {
   const dispatch = useDispatch<AppDispatch>();
-  const { items, totalPrice, isLoading, error } = useSelector(
+  const { items, pricing, isLoading, error, isOpen } = useSelector(
     (state: RootState) => state.cart
   );
 
-  // Total item count for the Navbar badge
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Called on app/layout mount to hydrate Redux from the server
+  // Called on cart open to fetch fresh data from server
   const hydrateCart = useCallback(() => {
     dispatch(loadCart());
   }, [dispatch]);
 
-  // Optimistic add → then sync with API response
+  // Optimistic add → API call → rollback on failure
   const addToCart = useCallback(
-    (
+    async (
       variantId: string,
       quantity: number,
       product: CartApiProduct,
-      variant: CartApiVariant,
-      priceAtThatTime: number
+      variant: CartApiVariant
     ) => {
       // 1. Optimistic: update Redux immediately so UI reacts before API responds
       dispatch(
         optimisticAdd({
-          cartItemId: `optimistic-${variantId}`,
           variantId,
           quantity,
-          priceAtThatTime,
+          unavailable: false,
           product,
           variant,
         })
       );
-      // 2. Real: sync with server; fulfilled handler overwrites optimistic state
-      dispatch(addItemToCart({ variantId, quantity }));
+
+      // 2. Await real API — fulfilled overwrites optimistic state with server truth
+      const result = await dispatch(addItemToCart({ variantId, quantity }));
+
+      // 3. Rollback: if API failed, refetch server cart to remove the ghost item
+      if (addItemToCart.rejected.match(result)) {
+        dispatch(loadCart());
+        showError(
+          result.error.message ?? 'Failed to add item. Please try again.'
+        );
+      }
     },
     [dispatch]
   );
@@ -79,20 +87,32 @@ export function useCart() {
     [dispatch]
   );
 
-  const emptyCart = useCallback(() => {
-    dispatch(clearCart());
+  // LOCAL reset — only call after checkout or on sign out
+  const resetCart = useCallback(() => {
+    dispatch(resetCartState());
+  }, [dispatch]);
+
+  const openDrawer = useCallback(() => {
+    dispatch(openCart());
+  }, [dispatch]);
+
+  const closeDrawer = useCallback(() => {
+    dispatch(closeCart());
   }, [dispatch]);
 
   return {
     items,
+    pricing,
     totalItems,
-    totalPrice,
     isLoading,
     error,
+    isOpen,
     hydrateCart,
     addToCart,
     removeFromCart,
     updateQuantity,
-    emptyCart,
+    resetCart,
+    openDrawer,
+    closeDrawer,
   };
 }

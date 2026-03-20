@@ -6,15 +6,19 @@ import {
   removeFromCartApi,
   updateCartQuantityApi,
 } from '@/services/cart/cartService';
+import { ApiResponse } from '@/types/apiResponse.types';
 
 // ─── Helper: map API response → Redux CartItem[] ──────────────────────────────
-function mapApiItemsToCartItems(response: CartApiResponse): CartItem[] {
-  if (!response) return [];
-  return response.items.map((item) => ({
-    cartItemId: item._id,
+function mapApiItemsToCartItems(
+  response: ApiResponse<CartApiResponse>
+): CartItem[] {
+  if (!response?.data) return [];
+  const { items } = response.data;
+  const validItems = response?.data?.items;
+  return items.map((item) => ({
+    unavailable: item?.unavailable ?? false,
     variantId: item.variantId,
     quantity: item.quantity,
-    priceAtThatTime: item.priceAtThatTime,
     product: item.product,
     variant: item.variant,
   }));
@@ -46,9 +50,14 @@ export const updateItemQuantity = createAsyncThunk(
 // ─── Initial State ────────────────────────────────────────────────────────────
 const initialState: CartState = {
   items: [],
-  totalPrice: 0,
+  pricing: {
+    payableAmount: 0,
+    totalSavings: 0,
+    originalTotal: 0,
+  },
   isLoading: false,
   error: null,
+  isOpen: false,
 };
 
 // ─── Slice ────────────────────────────────────────────────────────────────────
@@ -70,9 +79,22 @@ const cartSlice = createSlice({
       }
     },
 
-    clearCart(state) {
+    // LOCAL reset only — does NOT call any API.
+    // Valid use cases:
+    //   1. After successful checkout — backend cleared the cart, sync Redux to match
+    //   2. On sign out — session is gone, wipe client state
+    resetCartState(state) {
       state.items = [];
-      state.totalPrice = 0;
+      state.pricing = { originalTotal: 0, payableAmount: 0, totalSavings: 0 };
+      state.error = null;
+    },
+
+    openCart(state) {
+      state.isOpen = true;
+    },
+
+    closeCart(state) {
+      state.isOpen = false;
     },
   },
   extraReducers: (builder) => {
@@ -85,7 +107,7 @@ const cartSlice = createSlice({
       .addCase(loadCart.fulfilled, (state, action) => {
         state.isLoading = false;
         state.items = mapApiItemsToCartItems(action.payload);
-        state.totalPrice = action.payload.totalPrice;
+        state.pricing = action.payload.data.pricing;
       })
       .addCase(loadCart.rejected, (state, action) => {
         state.isLoading = false;
@@ -96,7 +118,7 @@ const cartSlice = createSlice({
     builder
       .addCase(addItemToCart.fulfilled, (state, action) => {
         state.items = mapApiItemsToCartItems(action.payload);
-        state.totalPrice = action.payload.totalPrice;
+        state.pricing = action.payload.data.pricing;
         state.error = null;
       })
       .addCase(addItemToCart.rejected, (state, action) => {
@@ -107,7 +129,7 @@ const cartSlice = createSlice({
     builder
       .addCase(removeItemFromCart.fulfilled, (state, action) => {
         state.items = mapApiItemsToCartItems(action.payload);
-        state.totalPrice = action.payload.totalPrice;
+        state.pricing = action.payload.data.pricing;
         state.error = null;
       })
       .addCase(removeItemFromCart.rejected, (state, action) => {
@@ -118,7 +140,7 @@ const cartSlice = createSlice({
     builder
       .addCase(updateItemQuantity.fulfilled, (state, action) => {
         state.items = mapApiItemsToCartItems(action.payload);
-        state.totalPrice = action.payload.totalPrice;
+        state.pricing = action.payload.data.pricing;
         state.error = null;
       })
       .addCase(updateItemQuantity.rejected, (state, action) => {
@@ -127,5 +149,6 @@ const cartSlice = createSlice({
   },
 });
 
-export const { optimisticAdd, clearCart } = cartSlice.actions;
+export const { optimisticAdd, resetCartState, openCart, closeCart } =
+  cartSlice.actions;
 export default cartSlice.reducer;

@@ -8,7 +8,12 @@ import { useCart } from '@/hooks/useCart';
 
 export default function Navbar() {
   const { data: session } = useSession();
-  const { totalItems } = useCart();
+  const { totalItems, resetCart, openDrawer } = useCart();
+
+  const handleSignOut = () => {
+    resetCart(); // clear Redux state so badge resets to 0 instantly
+    signOut({ callbackUrl: '/auth/login' });
+  };
 
   return (
     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -28,10 +33,10 @@ export default function Navbar() {
       {/* Right actions */}
       <div className="flex items-center gap-3">
         {/* Cart icon with live badge from Redux */}
-        <Link
-          href="/cart"
+        <button
+          onClick={openDrawer}
           className="relative rounded-xl p-2 transition hover:bg-gray-100"
-          aria-label="Cart"
+          aria-label="Open cart"
         >
           <ShoppingCart className="h-5 w-5 text-gray-700" />
           {totalItems > 0 && (
@@ -39,11 +44,11 @@ export default function Navbar() {
               {totalItems > 99 ? '99+' : totalItems}
             </span>
           )}
-        </Link>
+        </button>
 
         {session ? (
           <button
-            onClick={() => signOut({ callbackUrl: '/auth/login' })}
+            onClick={handleSignOut}
             className="hidden rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:block"
           >
             Sign Out

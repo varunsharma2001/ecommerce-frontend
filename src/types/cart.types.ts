@@ -57,4 +57,5 @@ export interface CartState {
   };
   isLoading: boolean; // true while GET /cart is in-flight on app load
   error: string | null;
+  isOpen: boolean;
 }

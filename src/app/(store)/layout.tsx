@@ -1,6 +1,7 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartHydrator from '@/components/layout/CartHydrator';
+import CartDrawer from '@/components/cart/CartDrawer';
 import './../globals.css';
 import { Suspense } from 'react';
 
@@ -13,6 +14,7 @@ export default function StoreLayout({
     <>
       {/* Fetches GET /cart once on mount to hydrate Redux (Navbar badge count) */}
       <CartHydrator />
+      <CartDrawer />
       <Suspense fallback={null}>
         <Header />
       </Suspense>
