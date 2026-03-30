@@ -1,27 +1,9 @@
 'use client';
 
-/**
- * useOptimistic — React 19 hook for instant UI feedback.
- *
- * The problem without it:
- *   User clicks "Add to Cart" → waits for API → badge updates → button resets
- *   On slow connections this feels broken.
- *
- * With useOptimistic:
- *   User clicks → button shows "Added ✓" and badge updates IMMEDIATELY
- *   → API runs in background (dispatch(addItemToCart))
- *   → If API succeeds: fulfilled reducer syncs real state
- *   → If API fails: React automatically reverts optimisticCount to real state
- *
- * useOptimistic(realValue, updater):
- *   - realValue: the actual cart count for this variant (from Redux)
- *   - updater: how to compute the optimistic value given an action
- */
-
-import { useOptimistic, useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
-import { formatCurrency, getDiscountPercent } from '@/utils/format';
+import { formatCurrency } from '@/utils/format';
 import type { CartApiVariant, CartApiProduct } from '@/types/cart.types';
 
 interface AddToCartSectionProps {
@@ -36,35 +18,30 @@ export default function AddToCartSection({
   const { items, addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
 
-  // Real cart quantity for this specific variant (from Redux)
+  // Reset quantity to 1 whenever the user switches to a different variant.
+  useEffect(() => {
+    setQuantity(1);
+  }, [variant._id]);
+
+  // Redux state is already updated optimistically by optimisticAdd inside useCart.addToCart,
+  // so currentQty reflects the latest count instantly — no separate useOptimistic needed.
   const currentQty =
     items.find((i) => i.variantId === variant._id)?.quantity ?? 0;
 
-  // useOptimistic: shows updated count before API confirms
-  const [optimisticQty, addOptimistic] = useOptimistic(
-    currentQty,
-    (state: number, added: number) => state + added
-  );
-
   const handleAddToCart = useCallback(() => {
-    // 1. Optimistic: update the displayed count instantly
-    addOptimistic(quantity);
-
-    // 2. Real: optimisticAdd + API call (inside useCart.addToCart)
-    addToCart(
-      variant._id,
-      quantity,
-      product,
-      variant,
-    );
-  }, [addOptimistic, addToCart, variant, product, quantity]);
+    addToCart(variant._id, quantity, product, variant);
+  }, [addToCart, variant, product, quantity]);
 
   const isOutOfStock = variant.stock === 0;
   const maxQty = Math.min(variant.stock, 10);
-  const displayPrice = variant.discountedPrice ?? variant.price;
-  const discount = variant.discountedPrice
-    ? getDiscountPercent(variant.price, variant.discountedPrice)
-    : 0;
+
+  // Backend sends both fields — only show discount UI when both are present and meaningful.
+  const hasDiscount =
+    variant.discountedPrice != null &&
+    variant.discountPercent != null &&
+    variant.discountPercent > 0;
+
+  const displayPrice = hasDiscount ? variant.discountedPrice! : variant.price;
 
   return (
     <div className="space-y-5">
@@ -73,13 +50,13 @@ export default function AddToCartSection({
         <span className="text-3xl font-bold text-gray-900">
           {formatCurrency(displayPrice)}
         </span>
-        {variant.discountedPrice && (
+        {hasDiscount && (
           <>
             <span className="text-lg text-gray-400 line-through">
               {formatCurrency(variant.price)}
             </span>
             <span className="text-sm font-semibold text-green-600">
-              {discount}% off
+              {variant.discountPercent}% off
             </span>
           </>
         )}
@@ -120,16 +97,16 @@ export default function AddToCartSection({
             </div>
           </div>
 
-          {/* Add to Cart button — shows optimistic cart count instantly */}
+          {/* Add to Cart button */}
           <button
             onClick={handleAddToCart}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-base font-medium text-white transition hover:bg-gray-700"
           >
             <ShoppingCart className="h-5 w-5" />
             Add to Cart
-            {optimisticQty > 0 && (
+            {currentQty > 0 && (
               <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
-                {optimisticQty} in cart
+                {currentQty} in cart
               </span>
             )}
           </button>

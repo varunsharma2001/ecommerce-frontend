@@ -1,109 +1,124 @@
 'use client';
 
 /**
- * useMemo is used in two places here:
+ * VariantSelector — renders one row per attribute.
  *
- * 1. attributeOptions — builds the map of { size: ['S','M','L'], color: ['Red','Blue'] }
- *    from all variants. This only needs to recompute when the variants array changes
- *    (which never happens on PDP). Without memo, it runs on every keystroke/state change.
+ * isVisual: true  → SwatchButton (image thumbnail — color, shade, material)
+ * isVisual: false → OptionButton (plain text — size, storage, weight, ram)
  *
- * 2. selectedVariant — finds the variant that matches all currently selected attributes.
- *    Runs only when selectedAttributes or variants change — not on every render.
+ * Availability rules:
+ *   Visual (color): available if ANY variant with this value has stock > 0.
+ *   Non-visual (size): available only if current-color + this-size variant has stock > 0.
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import type { AttributeDefinition, ProductImage } from '@/types/product.types';
 import type { CartApiVariant } from '@/types/cart.types';
+import SwatchButton from './SwatchButton';
+import OptionButton from './OptionButton';
 
 interface VariantSelectorProps {
+  attributeDefinitions: AttributeDefinition[];
   variants: CartApiVariant[];
-  onVariantChange: (variant: CartApiVariant) => void;
+  selectedAttributes: Record<string, string>;
+  onAttributeChange: (attrName: string, value: string) => void;
 }
 
 export default function VariantSelector({
+  attributeDefinitions,
   variants,
-  onVariantChange,
+  selectedAttributes,
+  onAttributeChange,
 }: VariantSelectorProps) {
-  // Initialize with first variant's attributes
-  const [selectedAttributes, setSelectedAttributes] = useState<
-    Record<string, string>
-  >(() => ({ ...variants[0]?.attributes }));
-
-  // useMemo: compute available attribute keys + their unique values once
-  const attributeOptions = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    variants.forEach((v) => {
+  // Derive unique values per attribute from variants.
+  // attributeDefinitions has name/displayName/isVisual but no values —
+  // values live inside each variant's attributes.
+  const valueMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    variants.forEach((v) =>
       Object.entries(v.attributes).forEach(([key, val]) => {
-        if (!map.has(key)) map.set(key, new Set());
-        map.get(key)!.add(val);
-      });
-    });
-    return Array.from(map.entries()).map(([name, values]) => ({
-      name,
-      values: Array.from(values),
-    }));
+        if (!map.has(key)) map.set(key, []);
+        if (!map.get(key)!.includes(val)) map.get(key)!.push(val);
+      })
+    );
+    return map;
   }, [variants]);
 
-  // useMemo: find matching variant whenever selection changes
-  const selectedVariant = useMemo(
-    () =>
-      variants.find((v) =>
-        Object.entries(selectedAttributes).every(
-          ([key, val]) => v.attributes[key] === val
-        )
-      ),
-    [variants, selectedAttributes]
-  );
-
-  const handleSelect = (attrName: string, value: string) => {
-    const updated = { ...selectedAttributes, [attrName]: value };
-    setSelectedAttributes(updated);
-    const matched = variants.find((v) =>
-      Object.entries(updated).every(([k, val]) => v.attributes[k] === val)
+  const getSwatchImage = (
+    attrName: string,
+    value: string
+  ): ProductImage | null => {
+    const match = variants.find(
+      (v) => v.attributes[attrName] === value && v.images?.length > 0
     );
-    if (matched) onVariantChange(matched);
+    return match?.images[0] ?? null;
   };
 
+  const isVisualAvailable = (attrName: string, value: string): boolean =>
+    variants.some((v) => v.attributes[attrName] === value && v.stock > 0);
+
+  const isNonVisualAvailable = (attrName: string, value: string): boolean => {
+    const visualNames = attributeDefinitions
+      .filter((d) => d.isVisual)
+      .map((d) => d.name);
+
+    return variants.some((v) => {
+      const matchesThis = v.attributes[attrName] === value;
+      const matchesVisuals = visualNames.every(
+        (vName) => v.attributes[vName] === selectedAttributes[vName]
+      );
+      return matchesThis && matchesVisuals && v.stock > 0;
+    });
+  };
+
+  const sortedDefinitions = [...attributeDefinitions].sort(
+    (a, b) => a.displayOrder - b.displayOrder
+  );
   return (
-    <div className="space-y-4">
-      {attributeOptions.map(({ name, values }) => (
-        <div key={name}>
-          <p className="mb-2 text-sm font-medium text-gray-900 capitalize">
-            {name}:{' '}
-            <span className="font-normal text-gray-500">
-              {selectedAttributes[name]}
-            </span>
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {values.map((value) => {
-              const isSelected = selectedAttributes[name] === value;
-              const isAvailable = variants.some(
-                (v) => v.attributes[name] === value && v.stock > 0
-              );
-              return (
-                <button
-                  key={value}
-                  onClick={() => handleSelect(name, value)}
-                  disabled={!isAvailable}
-                  className={`rounded-lg border px-3 py-1.5 text-sm transition ${
-                    isSelected
-                      ? 'border-gray-900 bg-gray-900 text-white'
-                      : isAvailable
-                        ? 'border-gray-200 text-gray-700 hover:border-gray-400'
-                        : 'cursor-not-allowed border-gray-100 text-gray-300 line-through'
-                  }`}
-                >
-                  {value}
-                </button>
-              );
-            })}
+    <div className="space-y-5">
+      {sortedDefinitions.map(({ name, displayName, isVisual }) => {
+        const values = valueMap.get(name) ?? [];
+
+        return (
+          <div key={name}>
+            {/* Row label: "Color: Red" */}
+            <p className="mb-3 text-sm font-medium text-gray-900">
+              {displayName}:{' '}
+              <span className="font-normal text-gray-500">
+                {selectedAttributes[name]}
+              </span>
+            </p>
+
+            {isVisual ? (
+              <div className="flex flex-wrap gap-3">
+                {values.map((value) => (
+                  <SwatchButton
+                    key={value}
+                    value={value}
+                    displayName={displayName}
+                    image={getSwatchImage(name, value)}
+                    isSelected={selectedAttributes[name] === value}
+                    isAvailable={isVisualAvailable(name, value)}
+                    onClick={() => onAttributeChange(name, value)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {values.map((value) => (
+                  <OptionButton
+                    key={value}
+                    value={value}
+                    isSelected={selectedAttributes[name] === value}
+                    isAvailable={isNonVisualAvailable(name, value)}
+                    onClick={() => onAttributeChange(name, value)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
-      {selectedVariant && (
-        <p className="text-xs text-gray-400">
-          {selectedVariant.stock > 0 ? `${selectedVariant.stock} in stock` : 'Out of stock'}
-        </p>
-      )}
+        );
+      })}
     </div>
   );
 }

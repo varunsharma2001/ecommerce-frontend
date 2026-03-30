@@ -36,7 +36,6 @@ export default function CartDrawer() {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
-  console.log('#39', items);
   return (
     <>
       {/* Overlay */}

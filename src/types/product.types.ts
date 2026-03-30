@@ -4,6 +4,16 @@ export interface ProductImage {
   public_id: string;
 }
 
+// ─── Attribute Definition ─────────────────────────────────────────────────────
+// Copied from AttributeMaster at product creation time.
+// Drives UI rendering: isVisual=true → image swatch, false → plain button.
+export interface AttributeDefinition {
+  name: string; // system key — used for matching  e.g. "color"
+  displayName: string; // shown to user                   e.g. "Color"
+  isVisual: boolean; // true → swatch, false → button
+  displayOrder: number; // controls row order in selector UI
+}
+
 // ─── Product Variant ─────────────────────────────────────────────────────────
 // The purchasable unit. Products are for display; variants are what gets
 // added to the cart. `attributes` is a key-value Map (e.g. { color: 'Red', size: 'M' }).
@@ -11,9 +21,11 @@ export interface ProductVariant {
   _id: string;
   sku: string;
   price: number;
+  discountPercent?: number;
   discountedPrice?: number; // sale price — must be <= price
   stock: number;
   attributes: Record<string, string>; // { "color": "Red", "size": "M" }
+  images: ProductImage[]; // variant-specific images (front, back, side angles)
   isActive: boolean;
 }
 
@@ -52,6 +64,7 @@ export interface Product {
   rating: number;
   totalSold: number;
   variants: ProductVariant[];
+  attributeDefinitions: AttributeDefinition[]; // drives swatch vs button UI
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;

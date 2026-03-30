@@ -13,10 +13,10 @@ export interface CartApiVariant {
   _id: string;
   attributes: Record<string, string>; // Map<string, string> e.g. { color: 'Red', size: 'M' }
   price: number;
+  discountPercent?: number;
   discountedPrice?: number;
-  discountedPercentage?: number;
   stock: number;
-  images?: ProductImage[];
+  images: ProductImage[]; // variant images — first image shows in cart thumbnail
 }
 
 // Shape of each item returned by GET /cart (after backend's transform)
