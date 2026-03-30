@@ -37,9 +37,23 @@ export async function generateMetadata({ params }: PDPProps) {
   try {
     const data: ApiResponse<Product> = await fetchProductById(id);
     const product = data.data;
+    const description = product.description.slice(0, 160);
+    const image = product.images[0]?.url;
+
     return {
       title: `${product.title} | ShopEase`,
-      description: product.description.slice(0, 160),
+      description,
+      openGraph: {
+        title: product.title,
+        description,
+        images: image ? [{ url: image }] : [],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: product.title,
+        description,
+        images: image ? [image] : [],
+      },
     };
   } catch {
     return { title: 'Product Not Found | ShopEase' };
