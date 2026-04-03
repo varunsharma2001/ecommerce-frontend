@@ -24,16 +24,21 @@ export default function AddToCartSection({
   }, [variant._id]);
 
   // Redux state is already updated optimistically by optimisticAdd inside useCart.addToCart,
-  // so currentQty reflects the latest count instantly — no separate useOptimistic needed.
+  // so currentQty reflects the latest count instantly — no spinner needed.
   const currentQty =
     items.find((i) => i.variantId === variant._id)?.quantity ?? 0;
 
+  // How many more the user can add: cap at stock remaining and a per-session limit of 10.
+  // Accounts for what's already in the cart so stepper never lets user exceed stock.
+  // When canAddMore hits 0, the button disables naturally — no artificial timer needed.
+  const canAddMore = Math.min(variant.stock - currentQty, 10);
+
   const handleAddToCart = useCallback(() => {
+    if (canAddMore <= 0) return;
     addToCart(variant._id, quantity, product, variant);
-  }, [addToCart, variant, product, quantity]);
+  }, [canAddMore, addToCart, variant, product, quantity]);
 
   const isOutOfStock = variant.stock === 0;
-  const maxQty = Math.min(variant.stock, 10);
 
   // Backend sends both fields — only show discount UI when both are present and meaningful.
   const hasDiscount =
@@ -87,8 +92,8 @@ export default function AddToCartSection({
                 {quantity}
               </span>
               <button
-                onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
-                disabled={quantity >= maxQty}
+                onClick={() => setQuantity((q) => Math.min(canAddMore, q + 1))}
+                disabled={quantity >= canAddMore}
                 className="flex h-9 w-9 items-center justify-center text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
                 aria-label="Increase"
               >
@@ -97,10 +102,11 @@ export default function AddToCartSection({
             </div>
           </div>
 
-          {/* Add to Cart button */}
+          {/* Button disables naturally when canAddMore hits 0 */}
           <button
             onClick={handleAddToCart}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-base font-medium text-white transition hover:bg-gray-700"
+            disabled={canAddMore <= 0}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-base font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <ShoppingCart className="h-5 w-5" />
             Add to Cart
@@ -110,6 +116,12 @@ export default function AddToCartSection({
               </span>
             )}
           </button>
+
+          {canAddMore <= 0 && currentQty > 0 && (
+            <p className="text-center text-sm text-amber-600">
+              Maximum quantity reached for this variant
+            </p>
+          )}
         </>
       )}
     </div>
