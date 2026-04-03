@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useState, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import QuantityControl from '@/components/ui/QuantityControl';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/utils/format';
 import type { CartApiVariant, CartApiProduct } from '@/types/cart.types';
@@ -79,27 +80,13 @@ export default function AddToCartSection({
           {/* Quantity stepper */}
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700">Quantity:</span>
-            <div className="flex items-center rounded-lg border border-gray-200">
-              <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
-                className="flex h-9 w-9 items-center justify-center text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
-                aria-label="Decrease"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="w-10 text-center text-sm font-medium">
-                {quantity}
-              </span>
-              <button
-                onClick={() => setQuantity((q) => Math.min(canAddMore, q + 1))}
-                disabled={quantity >= canAddMore}
-                className="flex h-9 w-9 items-center justify-center text-gray-600 transition hover:bg-gray-50 disabled:opacity-40"
-                aria-label="Increase"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
+            <QuantityControl
+              size="md"
+              quantity={quantity}
+              max={canAddMore}
+              onDecrease={() => setQuantity((q) => Math.max(1, q - 1))}
+              onIncrease={() => setQuantity((q) => Math.min(canAddMore, q + 1))}
+            />
           </div>
 
           {/* Button disables naturally when canAddMore hits 0 */}

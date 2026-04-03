@@ -7,7 +7,7 @@ import type { CartItem } from '@/types/cart.types';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/utils/format';
 import { Badge } from '@/components/ui/Badge';
-import QuantityControl from './QuantityControl';
+import QuantityControl from '@/components/ui/QuantityControl';
 
 interface CartItemCardProps {
   item: CartItem;
@@ -100,7 +100,7 @@ function CartItemCard({ item }: CartItemCardProps) {
 
           <QuantityControl
             quantity={quantity ?? 1}
-            stock={variant?.stock ?? 0}
+            max={variant?.stock ?? 0}
             disabled={unavailable}
             onDecrease={() => updateQuantity(variantId, quantity - 1)}
             onIncrease={() => updateQuantity(variantId, quantity + 1)}
